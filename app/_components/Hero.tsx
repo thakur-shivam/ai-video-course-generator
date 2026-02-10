@@ -18,6 +18,7 @@ import { QUICK_VIDEO_SUGGESTIONS } from "@/constants/courses";
 import { SignInButton, useUser } from "@clerk/nextjs";
 import axios from "axios";
 import { Loader2, Send } from "lucide-react";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { toast } from "sonner";
 
@@ -26,6 +27,7 @@ function Hero() {
   const [type, setType] = useState('full-course');
   const [loading, setLoading] = useState(false);
   const { user } = useUser();
+  const router = useRouter();
 
   const GenerateCourseLayout = async () => {
     const toastId = toast.loading("Generating your course layout ...");
@@ -39,7 +41,7 @@ function Hero() {
       });
       setLoading(false);
       toast.success("Course layout generate successfully!", { id: toastId })
-      // navigate to course editor page
+      router.push("/course/"+courseId);
     } catch (error) {
       setLoading(false);
       toast.error("Something went wrong, Please try again.", { id: toastId });
