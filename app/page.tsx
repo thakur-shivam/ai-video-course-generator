@@ -1,11 +1,9 @@
 import Courses from "./_components/Courses";
-import Header from "./_components/Header";
 import Hero from "./_components/Hero";
 
 export default function Home() {
   return (
     <div>
-      <Header />
       <Hero />
       <Courses />
       <div className="absolute -bottom-40 -left-40 h-[500px] w-[500px] bg-purple-400/20 blur-[120px] rounded-full" />
