@@ -1,3 +1,5 @@
+"use client";
+
 import {
   InputGroup,
   InputGroupAddon,
@@ -13,9 +15,37 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { QUICK_VIDEO_SUGGESTIONS } from "@/constants/courses";
-import { Send } from "lucide-react";
+import { SignInButton, useUser } from "@clerk/nextjs";
+import axios from "axios";
+import { Loader2, Send } from "lucide-react";
+import { useState } from "react";
+import { toast } from "sonner";
 
 function Hero() {
+  const [userInput, setUserInput] = useState('');
+  const [type, setType] = useState('full-course');
+  const [loading, setLoading] = useState(false);
+  const { user } = useUser();
+
+  const GenerateCourseLayout = async () => {
+    const toastId = toast.loading("Generating your course layout ...");
+    const courseId = await crypto.randomUUID();
+    try {
+      setLoading(true);
+      const response = await axios.post('/api/generate-course-layout', {
+        userInput, 
+        type,
+        courseId: courseId
+      });
+      setLoading(false);
+      toast.success("Course layout generate successfully!", { id: toastId })
+      // navigate to course editor page
+    } catch (error) {
+      setLoading(false);
+      toast.error("Something went wrong, Please try again.", { id: toastId });
+    }
+  }
+
   return (
     <div className="flex flex-col items-center mt-20">
       <div>
@@ -32,7 +62,9 @@ function Hero() {
           <InputGroupTextarea
             data-slot="input-group-control"
             className="flex field-sizing-content min-h-24 w-full resize-none rounded-xl bg-white px-3 py-2.5 text-base transition-[color,box-shadow] outline-none md:text-sm"
-            placeholder="Autoresize textarea..."
+            placeholder="Enter your course topic ..."
+            value={userInput}
+            onChange={(e) => setUserInput(e.target.value)}
           />
           <InputGroupAddon align="block-end">
             <Select>
@@ -42,23 +74,45 @@ function Hero() {
               <SelectContent>
                 <SelectGroup>
                   <SelectItem value="full-course">Full Course</SelectItem>
-                  <SelectItem value="quick-explain-video">Quick Explain Video</SelectItem>
+                  <SelectItem value="quick-explain-video">
+                    Quick Explain Video
+                  </SelectItem>
                 </SelectGroup>
               </SelectContent>
             </Select>
-            <InputGroupButton
-              className="ml-auto"
-              size="icon-sm"
-              variant="default"
-            >
-              <Send />
-            </InputGroupButton>
+            {user ? (
+              <InputGroupButton
+                className="ml-auto"
+                size="icon-sm"
+                variant="default"
+                disabled={loading}
+                onClick={GenerateCourseLayout}
+              >
+                {loading ? <Loader2 className="animate-spin" /> : <Send />}
+              </InputGroupButton>
+            ) : (
+              <SignInButton mode="modal">
+                <InputGroupButton
+                  className="ml-auto"
+                  size="icon-sm"
+                  variant="default"
+                >
+                  <Send />
+                </InputGroupButton>
+              </SignInButton>
+            )}
           </InputGroupAddon>
         </InputGroup>
       </div>
       <div className="flex gap-5 mt-5 max-w-3xl flex-wrap justify-center z-10">
         {QUICK_VIDEO_SUGGESTIONS.map((suggestion, index) => (
-            <h2 key={index} className="border rounded-2xl px-2 p-1 text-sm bg-white">{suggestion.title}</h2>
+          <h2
+            key={index}
+            className="border rounded-2xl px-2 p-1 text-sm bg-white cursor-pointer"
+            onClick={() => setUserInput(suggestion?.prompt)}
+          >
+            {suggestion.title}
+          </h2>
         ))}
       </div>
     </div>
