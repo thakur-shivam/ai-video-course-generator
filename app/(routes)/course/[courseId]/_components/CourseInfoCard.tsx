@@ -1,13 +1,32 @@
+"use client";
+
 import { Course } from "@/type/course-type";
 import { BookOpen, ChartNoAxesColumnIncreasing, Sparkles } from "lucide-react";
 import { Player } from "@remotion/player";
-import ChapterVideo from "./ChapterVideo";
+import { useEffect, useMemo, useState } from "react";
+import { CourseComposition } from "./ChapterVideo";
 
 type Props = {
   course: Course | undefined;
+  durationBySlideId: Record<string, number> | null;
 };
 
-function CourseInfoCard({ course }: Props) {
+function CourseInfoCard({ course, durationBySlideId }: Props) {
+  const fps = 30;
+  const slides = course?.chapterContentSlides ?? [];
+
+  const durationInFrames = useMemo(() => {
+    if (!durationBySlideId) return;
+    return slides.reduce(
+      (sum, slide) => sum + (durationBySlideId[slide.slideId] ?? fps * 6),
+      0,
+    );
+  }, [slides, durationBySlideId, fps]);
+
+  if (!durationBySlideId) {
+    return <div>Loading ...</div>;
+  }
+
   return (
     <div>
       <div className="p-20 rounded-2xl grid grid-cols-1 md:grid-cols-2 gap-5 bg-gradient-to-br from-slate-950 via-slate-800 to-emerald-950">
@@ -34,8 +53,15 @@ function CourseInfoCard({ course }: Props) {
         </div>
         <div className="border-2 border-white/10 rounded-2xl">
           <Player
-            component={ChapterVideo}
-            durationInFrames={30}
+            component={CourseComposition}
+            inputProps={{
+              // @ts-ignore
+              slides: slides,
+              durationBySlideId: durationBySlideId,
+            }}
+            durationInFrames={
+              durationInFrames && durationInFrames !== 0 ? durationInFrames : 30
+            }
             compositionWidth={1280}
             compositionHeight={720}
             fps={30}

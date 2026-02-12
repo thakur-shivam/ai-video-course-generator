@@ -2,13 +2,25 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Course } from '@/type/course-type'
 import { Player } from '@remotion/player';
 import { Dot } from 'lucide-react';
-import ChapterVideo from './ChapterVideo';
+import { CourseComposition } from './ChapterVideo';
 
 type Props = {
-  course: Course | undefined
-}
+  course: Course | undefined;
+  durationBySlideId: Record<string, number> | null;
+};
 
-function CourseChapters({course} : Props) {
+function CourseChapters({course, durationBySlideId} : Props) {
+  const fps = 30;
+  const slides = course?.chapterContentSlides ?? [];
+
+  const GetChapterDurationInFrame = (chapterId: string) => {
+    if (!durationBySlideId || !course) return 30;
+
+    return course?.chapterContentSlides
+      .filter((slide) => slide.chapterId === chapterId)
+      .reduce((sum, slide) => sum + (durationBySlideId[slide.slideId] ?? fps), 0);
+  }
+
   return (
     <div className="max-w-6xl -mt-5 p-10 border rounded-3xl shadow w-full bg-background/80 backdrop-blur">
       <div className="flex justify-between items-center">
@@ -18,7 +30,7 @@ function CourseChapters({course} : Props) {
         </h2>
       </div>
 
-      <div className='mt-5' >
+      <div className="mt-5">
         {course?.courseLayout?.chapters.map((chapter, index) => (
           <Card className="mb-5" key={index}>
             <CardHeader>
@@ -40,22 +52,29 @@ function CourseChapters({course} : Props) {
                       <h2>{content}</h2>
                     </div>
                   ))}
-                  </div>
-                  <div>
-                    <Player 
-                      component={ChapterVideo}
-                      durationInFrames={30}
-                      compositionWidth={1280}
-                      compositionHeight={720}
-                      fps={30}
-                      controls
-                      style={{
-                          width: "80%",
-                          height: "180px",
-                          aspectRatio: "16/9"
-                      }}
-                    />
-                  </div>
+                </div>
+                <div>
+                  <Player
+                    component={CourseComposition}
+                    inputProps={{
+                      // @ts-ignore
+                      slides: slides.filter((slide) => slide.chapterId === chapter.chapterId),
+                      durationsBySlideId: durationBySlideId ?? {},
+                    }}
+                    durationInFrames={GetChapterDurationInFrame(
+                      chapter?.chapterId,
+                    )}
+                    compositionWidth={1280}
+                    compositionHeight={720}
+                    fps={30}
+                    controls
+                    style={{
+                      width: "80%",
+                      height: "180px",
+                      aspectRatio: "16/9",
+                    }}
+                  />
+                </div>
               </div>
             </CardContent>
           </Card>

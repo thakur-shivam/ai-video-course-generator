@@ -70,20 +70,20 @@ export async function POST(req: NextRequest) {
   // }
 
   // Save Everything to Database
-  VideoContentJSON.forEach(async (slide, index) => {
-    const response = await db.insert(chapterContentSlides).values({
-      chapterId: chapter.chapterId,
-      courseId: courseId,
-      slideIndex: VideoContentJSON[index].slideIndex,
-      slideId: VideoContentJSON[index].slideId,
-      audioFileName: VideoContentJSON[index].audioFileName,
-      narration: VideoContentJSON[index].narration,
-      revealData: VideoContentJSON[index].revelData,
-      html: VideoContentJSON[index].html,
-      audioFileUrl: audioFileUrls[index],
-      caption: captionArray[index] ?? {}
-    }).returning();
-  });
+  // VideoContentJSON.forEach(async (slide, index) => {
+  //   const response = await db.insert(chapterContentSlides).values({
+  //     chapterId: chapter.chapterId,
+  //     courseId: courseId,
+  //     slideIndex: VideoContentJSON[index].slideIndex,
+  //     slideId: VideoContentJSON[index].slideId,
+  //     audioFileName: VideoContentJSON[index].audioFileName,
+  //     narration: VideoContentJSON[index].narration,
+  //     revealData: VideoContentJSON[index].revelData,
+  //     html: VideoContentJSON[index].html,
+  //     audioFileUrl: audioFileUrls[index],
+  //     caption: captionArray[index] ?? {}
+  //   }).returning();
+  // });
 
   // Return Response
   return NextResponse.json({
