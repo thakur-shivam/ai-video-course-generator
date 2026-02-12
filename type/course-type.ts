@@ -25,6 +25,10 @@ export type ChapterContentSlide = {
     }
     html: string
     revealData: string[]
+    audioFileUrl: string
+    caption: {
+        chunks: string[]
+    }
 }
 
 export type Course = {
@@ -34,5 +38,5 @@ export type Course = {
     createdAt: string
     id: number
     courseLayout: CourseLayout
-    chapterContentSlides: ChapterContentSlide
+    chapterContentSlides: ChapterContentSlide[]
 }

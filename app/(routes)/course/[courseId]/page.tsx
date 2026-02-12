@@ -7,13 +7,14 @@ import { useParams } from 'next/navigation'
 import { Course } from '@/type/course-type';
 import CourseChapters from './_components/CourseChapters';
 import { toast } from 'sonner';
+import { getAudioData } from "@remotion/media-utils";
 
 function CoursePreview() {
     const [courseDetail, setCourseDetail] = useState<Course>();
     const { courseId } = useParams();
 
     useEffect(() => {
-        courseId && GetCourseDetail();
+      courseId && GetCourseDetail();
     }, [courseId]);
 
     const GetCourseDetail = async () => {
@@ -41,10 +42,36 @@ function CoursePreview() {
       }
       
     }
+
+  const fps = 30;
+  const slides = courseDetail?.chapterContentSlides ?? [];
+  const [durationBySlideId, setDurationBySlideId] = useState<Record<string, number> | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    const run = async () => {
+      if (!slides) return;
+      const entries = await Promise.all(
+        slides.map(async (slide) => {
+          const audioData = await getAudioData(slide?.audioFileUrl);
+          const audioDuration = audioData.durationInSeconds;
+          const frames = Math.max(1, Math.ceil(audioDuration * fps));
+          return [slide.slideId, frames] as const;
+        })
+      );
+      if (!cancelled) {
+        setDurationBySlideId(Object.fromEntries(entries));
+      }
+    }
+    run();
+    return () => {
+      cancelled = true;
+    }
+  }, [slides, fps]);
   return (
     <div className='flex flex-col items-center' >
-      <CourseInfoCard course={courseDetail} />
-      <CourseChapters course={courseDetail} />
+      <CourseInfoCard course={courseDetail} durationBySlideId={durationBySlideId}/>
+      <CourseChapters course={courseDetail} durationBySlideId={durationBySlideId}/>
     </div>
   );
 }
