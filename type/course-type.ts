@@ -13,6 +13,20 @@ export type CourseLayout = {
     chapters: Chapter[]
 }
 
+export type ChapterContentSlide = {
+    id: number
+    courseId: string
+    chapterId: string
+    slideId: string
+    slideIndex: number
+    audioFileName: string
+    narration: {
+        fullText: string
+    }
+    html: string
+    revealData: string[]
+}
+
 export type Course = {
     courseId: string
     courseName: string
@@ -20,4 +34,5 @@ export type Course = {
     createdAt: string
     id: number
     courseLayout: CourseLayout
+    chapterContentSlides: ChapterContentSlide
 }
